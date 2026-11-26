@@ -27,11 +27,21 @@ def verify_output() -> None:
     )
 
 
+def check_byte_budget() -> None:
+    """Byte-budget check: the gate counts characters, but the entry is
+    stored and judged as UTF-8 bytes, so the encoded form must also
+    stay well inside a sane budget (400 bytes here)."""
+    n_bytes = len(LINE.encode("utf-8"))
+    assert n_bytes <= 400, f"line is {n_bytes} UTF-8 bytes, budget is 400"
+    assert n_bytes >= len(LINE), "encoding must not shrink the line"
+
+
 def main() -> None:
     # Gate assertions: one line, 1-200 chars, not whitespace-only.
     assert LINE.strip(), "line must not be whitespace-only"
     assert "\n" not in LINE, "line must be a single line"
     assert 1 <= len(LINE) <= 200, f"line is {len(LINE)} chars, gate is 1-200"
+    check_byte_budget()
     os.makedirs("/output", exist_ok=True)
     with open("/output/entry.txt", "w", encoding="utf-8") as f:
         f.write(LINE)
